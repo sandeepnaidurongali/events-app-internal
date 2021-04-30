@@ -37,8 +37,6 @@ const mockEvents = {
 };
 
 
-
-
 // health endpoint - returns an empty array
 app.get('/', (req, res) => {
     res.json([]);
@@ -53,6 +51,7 @@ app.get('/version', (req, res) => {
 // mock events endpoint. this would be replaced by a call to a datastore
 // if you went on to develop this as a real application.
 app.get('/events', (req, res) => {
+ //   res.json(mockEvents);
     getEvents(req, res);
 });
 
@@ -73,6 +72,43 @@ app.post('/event', (req, res) => {
 
 });
 
+
+  function getEvents(req, res) {
+    firestore.collection("Events").get()
+        .then((snapshot) => {
+            if (!snapshot.empty) {
+                const ret = { events: []};
+                //snapshot.docs.forEach(element => {
+                 //   ret.events.push(element.data());
+                //}, this);
+                snapshot.docs.forEach(element => {
+                    //get data
+                    const el = element.data();
+                    //get internal firestore id and assign to object
+                    el.id = element.id;
+                    //add object to array
+                    ret.events.push(el);
+                    }, this);
+
+                console.log(ret);
+                res.json(ret);
+            } else {
+                 res.json(mockEvents);
+            }
+        })
+        .catch((err) => {
+            console.error('Error getting events', err);
+            res.json(mockEvents);
+        });
+};
+  
+    
+     // add to the mock array
+ //   mockEvents.events.push(ev);
+    // return the complete array
+  //  res.json(mockEvents);
+
+
 function getEvents(req, res) {
     firestore.collection("Events").get()
         .then((snapshot) => {
@@ -80,6 +116,12 @@ function getEvents(req, res) {
                 const ret = { events: []};
                 snapshot.docs.forEach(element => {
                     ret.events.push(element.data());
+                  //get data
+                  //  const el = element.data();
+                    //get internal firestore id and assign to object
+                  //  el.id = element.id;
+                    //add object to array
+                   // ret.events.push(el);
                 }, this);
                 console.log(ret);
                 res.json(ret);
